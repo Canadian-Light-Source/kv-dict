@@ -65,6 +65,9 @@ class RemoteKVMapping(MutableMapping[str, Any]):
         self._json_decoder = json_decoder
         self._bridge = _AsyncLoopBridge()
 
+    def _as_dict(self) -> dict[str, Any]:
+        return {key: self[key] for key in self}
+
     def _relevant_backend_keys(self, top_key: str) -> list[str]:
         base = self._mapper.full_key(top_key)
         keys = self._bridge.run(self._backend.list_keys(base))
@@ -120,6 +123,14 @@ class RemoteKVMapping(MutableMapping[str, Any]):
     def __len__(self) -> int:
         """Return count of top-level keys."""
         return len(list(iter(self)))
+
+    def __repr__(self) -> str:
+        """Represent mapping as a plain dictionary string."""
+        return repr(self._as_dict())
+
+    def __str__(self) -> str:
+        """Render mapping as a plain dictionary string."""
+        return str(self._as_dict())
 
     def close(self) -> None:
         """Close backend and bridge resources."""

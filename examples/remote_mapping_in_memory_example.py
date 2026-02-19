@@ -10,6 +10,7 @@ def main() -> None:
     mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
     try:
         mapping["user"] = {"alice": {"age": 30}}
+        print(f"{mapping=}")
         print("user:", mapping["user"])
         print("keys:", list(mapping))
         print("len:", len(mapping))

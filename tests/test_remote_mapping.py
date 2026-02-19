@@ -39,3 +39,15 @@ def test_remote_mapping_conflict_scalar_leaf_plus_child() -> None:
         assert mapping["main"] == {"_value": [1, 2, 3], "sub": {"nested": True}}
     finally:
         mapping.close()
+
+
+def test_remote_mapping_repr_and_str_are_dict_like() -> None:
+    backend = InMemoryAsyncBackend()
+    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+    try:
+        mapping["user"] = {"alice": {"age": 30}}
+        expected = "{'user': {'alice': {'age': 30}}}"
+        assert repr(mapping) == expected
+        assert str(mapping) == expected
+    finally:
+        mapping.close()
