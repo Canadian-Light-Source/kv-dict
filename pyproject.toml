@@ -2,9 +2,7 @@
 name = "kv-dict"
 description = "KV bacjed dictionary, similar to RedisJSONDict"
 license = { text = "GPL-3.0-only" }
-authors = [
-  { name = "Niko Kivel", email = "niko.kivel@lightsource.ca" }
-]
+authors = [{ name = "Niko Kivel", email = "niko.kivel@lightsource.ca" }]
 dynamic = ["version"]
 classifiers = [
   "Programming Language :: Python :: 3",
@@ -16,23 +14,24 @@ dependencies = []
 
 [dependency-groups]
 dev = [
-    "ruff",
-    "pyright[nodejs] !=1.1.401, !=1.1.407",
-    "pre-commit",
-    "pytest >=6",
-    "pytest-cov >=3",
-    "pytest-asyncio",
-    "pytest-md",
-    "typing-extensions",
-    "ipython>=9.10.0",
-    "bluesky>=1.14.6",
+  "ruff",
+  "pyright[nodejs] !=1.1.401, !=1.1.407",
+  "pre-commit",
+  "pytest >=6",
+  "pytest-cov >=3",
+  "pytest-asyncio",
+  "pytest-md",
+  "typing-extensions",
+  "ipython>=9.10.0",
+  "bluesky>=1.14.6",
+  "redis>=7.2.0",
 ]
 docs = [
-    "sphinx !=4.1.0,!=4.1.1,!=4.1.2,!=4.2.0",
-    "sphinx-click",
-    "sphinx-copybutton",
-    "pydata-sphinx-theme",
-    "sphinxcontrib-mermaid",
+  "sphinx !=4.1.0,!=4.1.1,!=4.1.2,!=4.2.0",
+  "sphinx-click",
+  "sphinx-copybutton",
+  "pydata-sphinx-theme",
+  "sphinxcontrib-mermaid",
 ]
 
 [tool.uv]
@@ -58,14 +57,14 @@ reportImplicitOverride = "error"
 target-version = "py313"
 line-length = 121
 indent-width = 4
-extend-exclude = ["kv_dict/_version.py"]  # auto-generated file
+extend-exclude = ["kv_dict/_version.py"] # auto-generated file
 
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
   "D100",
-  "D203",  # prefer D211
-  "D213",  # prefer D212
+  "D203",   # prefer D211
+  "D213",   # prefer D212
   "D400",
   "ANN002",
   "ANN003",
@@ -134,18 +133,10 @@ addopts = "-v"
 [tool.coverage.run]
 branch = true
 source = ["kv_dict"]
-omit = [
-  "kv_dict/_version.py",
-  "tests/*",
-  ".venv/*",
-]
+omit = ["kv_dict/_version.py", "tests/*", ".venv/*"]
 
 [tool.coverage.report]
-omit = [
-  "kv_dict/_version.py",
-  "tests/*",
-  ".venv/*",
-]
+omit = ["kv_dict/_version.py", "tests/*", ".venv/*"]
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]

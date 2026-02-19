@@ -2,6 +2,7 @@
 
 from .in_memory import InMemoryAsyncBackend
 from .protocol import Backend
+from .redis import RedisBackend
 
 
-__all__ = ["Backend", "InMemoryAsyncBackend"]
+__all__ = ["Backend", "InMemoryAsyncBackend", "RedisBackend"]

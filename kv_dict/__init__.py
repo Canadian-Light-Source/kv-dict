@@ -5,7 +5,7 @@ import warnings
 
 from ._version import version as __version__
 from .async_bridge_poc import AsyncBridgePOC, DummyAsyncKVBackend
-from .backends import Backend, InMemoryAsyncBackend
+from .backends import Backend, InMemoryAsyncBackend, RedisBackend
 from .key_mapping import KeyMapper
 from .mappings import RemoteKVMapping
 
@@ -16,6 +16,7 @@ __all__ = [
     "DummyAsyncKVBackend",
     "InMemoryAsyncBackend",
     "KeyMapper",
+    "RedisBackend",
     "RemoteKVMapping",
     "__version__",
 ]

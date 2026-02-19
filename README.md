@@ -45,3 +45,14 @@ Run a basic `RemoteKVMapping` flow backed by `InMemoryAsyncBackend`:
 ```bash
 uv run python examples/remote_mapping_in_memory_example.py
 ```
+
+## Remote Mapping + Redis/Dragonfly Backend Example
+
+Run a basic `RemoteKVMapping` flow backed by a Redis-compatible server:
+
+```bash
+uv run python examples/remote_mapping_redis_example.py
+```
+
+Note: in the devcontainer compose setup, the Redis-compatible service hostname
+is `redis`.
