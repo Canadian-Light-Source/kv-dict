@@ -1,0 +1,12 @@
+name: Create tagged release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-release:
+    uses: "daq/gha_workflows/.github/workflows/create_release.yml@main"
+    secrets:
+      RELEASE_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

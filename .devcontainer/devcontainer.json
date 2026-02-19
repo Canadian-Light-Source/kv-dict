@@ -1,0 +1,46 @@
+{
+  "name": "kv-dict-devcontainer",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "options": ["--platform=linux/amd64"],
+    "args": {
+      "USER_UID": "${localEnv:UID:1000}",
+      "USER_GID": "${localEnv:GID:10000}"
+      // $GID may not exist, use 10000='domain users' by default
+    }
+  },
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true,
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "customizations": {
+    "vscode": {
+      "settings": {},
+      "extensions": [
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "charliermarsh.ruff",
+        "GitHub.copilot",
+        "tamasfe.even-better-toml",
+        "redhat.vscode-yaml"
+      ]
+    },
+    "jetbrains": {
+      "backend": "PyCharm",
+      "settings": {},
+      "plugins": [
+        "com.koxudaxi.ruff",
+        "com.github.copilot",
+        "org.toml.lang",
+        "org.jetbrains.plugins.yaml"
+      ]
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "mounts": ["source=${localWorkspaceFolderBasename}-venv,target=${containerWorkspaceFolder}/.venv,type=volume"],
+  "postCreateCommand": "sudo chown vscode:vscode .venv && uv sync --all-extras --frozen",
+  "containerEnv": {
+    "UV_LINK_MODE": "copy" // don't hardlink dependency files
+  }
+}

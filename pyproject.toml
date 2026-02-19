@@ -1,0 +1,159 @@
+[project]
+name = "kv-dict"
+description = "KV bacjed dictionary, similar to RedisJSONDict"
+license = { text = "GPL-3.0-only" }
+authors = [
+  { name = "Niko Kivel", email = "niko.kivel@lightsource.ca" }
+]
+dynamic = ["version"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.13",
+]
+requires-python = ">=3.13,<3.14"
+readme = "README.md"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "pyright[nodejs] !=1.1.401, !=1.1.407",
+    "pre-commit",
+    "pytest >=6",
+    "pytest-cov >=3",
+    "pytest-asyncio",
+    "pytest-md",
+    "typing-extensions",
+]
+docs = [
+    "sphinx !=4.1.0,!=4.1.1,!=4.1.2,!=4.2.0",
+    "sphinx-click",
+    "sphinx-copybutton",
+    "pydata-sphinx-theme",
+    "sphinxcontrib-mermaid",
+]
+
+[tool.uv]
+managed = true
+[tool.pyright]
+# see https://github.com/microsoft/pyright/blob/main/docs/configuration.md
+pythonVersion = "3.13"
+include = ["kv_dict"]
+exclude = ["**/__pycache__"]
+typeCheckingMode = "standard"
+# many of these checks are also handled by Ruff (as warnings)
+reportDeprecated = "error"
+reportDuplicateImport = "warning"
+reportMissingSuperCall = "warning"
+reportUninitializedInstanceVariable = "error"
+reportUnusedCallResult = "warning"
+reportUnusedExpression = "error"
+reportMatchNotExhaustive = "error"
+reportImplicitOverride = "error"
+
+[tool.ruff]
+# see https://docs.astral.sh/ruff
+target-version = "py313"
+line-length = 121
+indent-width = 4
+extend-exclude = ["kv_dict/_version.py"]  # auto-generated file
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "D100",
+  "D203",  # prefer D211
+  "D213",  # prefer D212
+  "D400",
+  "ANN002",
+  "ANN003",
+  "ANN204",
+  "ANN401",
+  "T20",
+  "FIX",
+  "TD002",
+  "TD003",
+  "TD006",
+  "TD007",
+  "ARG002",
+  # redundant rules that will be resolved automatically by the formatter
+  # see https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
+  "W191",
+  "E111",
+  "E114",
+  "E117",
+  "D206",
+  "D300",
+  "Q000",
+  "Q001",
+  "Q002",
+  "Q003",
+  "COM812",
+  "COM819",
+  "ISC001",
+  "ISC002",
+]
+
+[tool.ruff.lint.flake8-annotations]
+suppress-none-returning = true
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2
+split-on-trailing-comma = false
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+# allow unused imports and star imports
+"__init__.py" = ["F401", "F403"]
+# allow common testing practices, notably `assert` statements
+"tests/**/*.py" = ["D", "S101", "SLF001", "INP001"]
+# Exclude the IPython startup files from the N999 rule
+"**/startup/[0-9][0-9]_*.py" = ["INP001", "N999", "F821"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+skip-magic-trailing-comma = true
+
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+
+[tool.pytest.ini_options]
+norecursedirs = ["kv_dict"]
+testpaths = ["tests"]
+addopts = "-v"
+
+[tool.coverage.run]
+branch = true
+source = ["kv_dict"]
+omit = [
+  "kv_dict/_version.py",
+  "tests/*",
+  ".venv/*",
+]
+
+[tool.coverage.report]
+omit = [
+  "kv_dict/_version.py",
+  "tests/*",
+  ".venv/*",
+]
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch]
+version.source = "vcs"
+build.hooks.vcs.version-file = "kv_dict/_version.py"
+version.fallback-version = "0.0.0"
+
+[tool.hatch.envs.default]
+features = ["dev"]
+scripts.test = "pytest {args}"

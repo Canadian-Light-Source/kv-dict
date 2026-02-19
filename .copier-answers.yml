@@ -1,0 +1,16 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v0.3.3
+_src_path: git+https://github.lightsource.ca/daq/cls-copier-template
+bluesky_profile: false
+enable_bump_deps: true
+enable_devcontainer: true
+env_tool_choice: uv
+min_python_version: py313
+project_description: KV bacjed dictionary, similar to RedisJSONDict
+project_license: GPL-3.0-only
+project_name: kv-dict
+project_repo_url_git: https://github.lightsource.ca/kiveln/kv-dict.git
+project_slug: kv_dict
+use_gh_cli: true
+user_email: niko.kivel@lightsource.ca
+user_name: Niko Kivel
