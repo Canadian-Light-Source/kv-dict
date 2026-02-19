@@ -122,7 +122,6 @@ MutableMapping (inheritance chain)
 ### Component Responsibilities
 
 1. **RemoteKVMapping** (main class)
-
    - Implements `MutableMapping` interface
    - Orchestrates Backend, KeyMapper, Trie, and Executor
    - Synchronous methods: `__getitem__`, `__setitem__`, `__delitem__`,
@@ -130,24 +129,20 @@ MutableMapping (inheritance chain)
    - Internal async methods for backend operations
 
 2. **Backend** (abstract base)
-
    - Abstract methods: `async get(key)`, `async set(key, value)`,
      `async delete(key)`, `async list_keys(prefix)`
    - Subclasses implement Redis and NATS specifics
 
 3. **KeyMapper**
-
    - Parses `ep1:main:sup1` → `["main", "sup1"]`
    - Filters KV keys by entry_point prefix
    - Reconstructs KV keys from nested paths
 
 4. **TrieStructure** (pygtrie.StringTrie)
-
    - Stores flattened KV keys for efficient prefix lookups
    - Supports building nested dicts on retrieval
 
 5. **ValueCodec**
-
    - Encodes Python objects → JSON strings (for storage)
    - Decodes JSON strings → Python objects (on retrieval)
 
