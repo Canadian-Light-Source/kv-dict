@@ -73,3 +73,20 @@ def test_remote_mapping_nested_item_assignment_persists() -> None:
         assert mapping["user"]["alice"]["email"] == "alice@example.com"
     finally:
         mapping.close()
+
+
+def test_remote_mapping_copy_returns_plain_detached_snapshot() -> None:
+    expected_age = 30
+    backend = InMemoryAsyncBackend()
+    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+    try:
+        mapping["user"] = {"alice": {"age": expected_age}}
+        snapshot = mapping.copy()
+
+        assert snapshot == {"user": {"alice": {"age": expected_age}}}
+        assert isinstance(snapshot, dict)
+
+        snapshot["user"]["alice"]["age"] = 99
+        assert mapping["user"]["alice"]["age"] == expected_age
+    finally:
+        mapping.close()

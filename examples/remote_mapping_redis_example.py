@@ -20,6 +20,9 @@ def main() -> None:
         mapping["3d"] = {"x": [1, 2, 3], "y": [3, 2, 1], "z": [0, 0, 0]}
         mapping["3d"].update({"a": [1, 1, 1]})
         assert mapping["3d"]["a"] == [1, 1, 1]  # noqa: S101
+        mapping["3d"].update({"a": [1, 1, 1]})
+        mapping["3d"]["a"][0] = 99
+        assert mapping["3d"]["a"] == [99, 1, 1]  # noqa: S101
     finally:
         mapping.close()
 

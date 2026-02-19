@@ -203,6 +203,10 @@ class RemoteKVMapping(MutableMapping[str, Any]):
         """Return count of top-level keys."""
         return len(list(iter(self)))
 
+    def copy(self) -> dict[str, Any]:
+        """Return a detached plain-dict snapshot of current mapping contents."""
+        return _to_plain(self._as_dict())
+
     @override
     def __repr__(self) -> str:
         """Represent mapping as a plain dictionary string."""

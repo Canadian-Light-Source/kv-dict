@@ -71,7 +71,7 @@ replacement of the built-in `dict` behavior.
 
 ### Dict parity roadmap
 
-- [ ] Implement `copy()` semantics for backend-backed snapshots.
+- [x] Implement `copy()` semantics for backend-backed snapshots.
 - [ ] Implement dict union operators (`|`, `|=`).
 - [ ] Implement `fromkeys()` with explicit persistence semantics.
 - [ ] Add write-through wrappers for mutable non-dict containers (for example,
