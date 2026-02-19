@@ -15,6 +15,11 @@ def main() -> None:
         print("user via get:", user)
         mapping.update({"user": {"alice": {"age": 42}}})
         print(f"{mapping=}")
+
+        # update test
+        mapping["3d"] = {"x": [1, 2, 3], "y": [3, 2, 1], "z": [0, 0, 0]}
+        mapping["3d"].update({"a": [1, 1, 1]})
+        assert mapping["3d"]["a"] == [1, 1, 1]  # noqa: S101
     finally:
         mapping.close()
 

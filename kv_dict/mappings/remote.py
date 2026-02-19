@@ -21,6 +21,71 @@ if TYPE_CHECKING:
 _T = TypeVar("_T")
 
 
+def _to_plain(value: Any) -> Any:
+    if isinstance(value, _WriteThroughDict):
+        return value.to_plain_dict()
+    if isinstance(value, dict):
+        return {k: _to_plain(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_to_plain(item) for item in value]
+    if isinstance(value, tuple):
+        return tuple(_to_plain(item) for item in value)
+    return value
+
+
+class _WriteThroughDict(MutableMapping[str, Any]):
+    """Dict-like wrapper that persists parent mapping on mutation."""
+
+    def __init__(self, data: dict[str, Any], on_change: Callable[[dict[str, Any]], None]) -> None:
+        super().__init__()
+        self._data = data
+        self._on_change = on_change
+
+    def _persist(self) -> None:
+        self._on_change(self.to_plain_dict())
+
+    def _wrap_if_needed(self, value: Any) -> Any:
+        if isinstance(value, dict):
+            return _WriteThroughDict(value, lambda _updated: self._persist())
+        return value
+
+    @override
+    def __getitem__(self, key: str) -> Any:
+        return self._wrap_if_needed(self._data[key])
+
+    @override
+    def __setitem__(self, key: str, value: Any) -> None:
+        self._data[key] = _to_plain(value)
+        self._persist()
+
+    @override
+    def __delitem__(self, key: str) -> None:
+        del self._data[key]
+        self._persist()
+
+    @override
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._data)
+
+    @override
+    def __len__(self) -> int:
+        return len(self._data)
+
+    @override
+    def update(self, *args: Any, **kwargs: Any) -> None:
+        updates = dict(*args, **kwargs)
+        for key, value in updates.items():
+            self._data[key] = _to_plain(value)
+        self._persist()
+
+    def to_plain_dict(self) -> dict[str, Any]:
+        return {key: _to_plain(value) for key, value in self._data.items()}
+
+    @override
+    def __repr__(self) -> str:
+        return repr(self.to_plain_dict())
+
+
 class _AsyncLoopBridge:
     """Bridge sync calls to async backend operations on a dedicated loop."""
 
@@ -100,13 +165,16 @@ class RemoteKVMapping(MutableMapping[str, Any]):
         if not pairs:
             raise KeyError(key)
 
-        return reconstruct_nested(pairs)
+        result = reconstruct_nested(pairs)
+        if isinstance(result, dict):
+            return _WriteThroughDict(result, lambda updated: self.__setitem__(key, updated))
+        return result
 
     @override
     def __setitem__(self, key: str, value: Any) -> None:
         """Store a top-level value at entry_point:key."""
         backend_key = self._mapper.full_key(key)
-        encoded_value = self._json_encoder(value)
+        encoded_value = self._json_encoder(_to_plain(value))
         self._bridge.run(self._backend.set(backend_key, encoded_value))
 
     @override

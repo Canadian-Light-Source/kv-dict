@@ -51,3 +51,25 @@ def test_remote_mapping_repr_and_str_are_dict_like() -> None:
         assert str(mapping) == expected
     finally:
         mapping.close()
+
+
+def test_remote_mapping_nested_update_persists() -> None:
+    backend = InMemoryAsyncBackend()
+    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+    try:
+        mapping["3d"] = {"x": [1, 2, 3], "y": [3, 2, 1], "z": [0, 0, 0]}
+        mapping["3d"].update({"a": [1, 1, 1]})
+        assert mapping["3d"]["a"] == [1, 1, 1]
+    finally:
+        mapping.close()
+
+
+def test_remote_mapping_nested_item_assignment_persists() -> None:
+    backend = InMemoryAsyncBackend()
+    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+    try:
+        mapping["user"] = {"alice": {"age": 30}}
+        mapping["user"]["alice"]["email"] = "alice@example.com"
+        assert mapping["user"]["alice"]["email"] == "alice@example.com"
+    finally:
+        mapping.close()
