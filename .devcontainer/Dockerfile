@@ -1,8 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/base:debian-12
-
-# dummy data directories
-WORKDIR /tmp/projects
-WORKDIR /beamlinedata/projects
+FROM mcr.microsoft.com/devcontainers/base:debian-13
 
 # set some user and workdir settings to work nicely with vscode
 # args may be overridden in devcontainer.json

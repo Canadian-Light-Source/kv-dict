@@ -24,6 +24,8 @@ dev = [
     "pytest-asyncio",
     "pytest-md",
     "typing-extensions",
+    "ipython>=9.10.0",
+    "bluesky>=1.14.6",
 ]
 docs = [
     "sphinx !=4.1.0,!=4.1.1,!=4.1.2,!=4.2.0",
@@ -151,8 +153,8 @@ build-backend = "hatchling.build"
 
 [tool.hatch]
 version.source = "vcs"
-build.hooks.vcs.version-file = "kv_dict/_version.py"
 version.fallback-version = "0.0.0"
+build.hooks.vcs.version-file = "kv_dict/_version.py"
 
 [tool.hatch.envs.default]
 features = ["dev"]

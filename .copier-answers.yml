@@ -9,7 +9,7 @@ min_python_version: py313
 project_description: KV bacjed dictionary, similar to RedisJSONDict
 project_license: GPL-3.0-only
 project_name: kv-dict
-project_repo_url_git: https://github.lightsource.ca/kiveln/kv-dict.git
+project_repo_url_git: https://github.lightsource.ca/daq/kv-dict.git
 project_slug: kv_dict
 use_gh_cli: true
 user_email: niko.kivel@lightsource.ca

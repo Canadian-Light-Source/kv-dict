@@ -2,7 +2,9 @@
   "name": "kv-dict-devcontainer",
   "build": {
     "dockerfile": "Dockerfile",
-    "options": ["--platform=linux/amd64"],
+    "options": [
+      "--platform=linux/amd64"
+    ],
     "args": {
       "USER_UID": "${localEnv:UID:1000}",
       "USER_GID": "${localEnv:GID:10000}"
@@ -21,7 +23,8 @@
         "charliermarsh.ruff",
         "GitHub.copilot",
         "tamasfe.even-better-toml",
-        "redhat.vscode-yaml"
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-containers"
       ]
     },
     "jetbrains": {
@@ -38,7 +41,9 @@
   "features": {
     "ghcr.io/devcontainers/features/git:1": {}
   },
-  "mounts": ["source=${localWorkspaceFolderBasename}-venv,target=${containerWorkspaceFolder}/.venv,type=volume"],
+  "mounts": [
+    "source=${localWorkspaceFolderBasename}-venv,target=${containerWorkspaceFolder}/.venv,type=volume"
+  ],
   "postCreateCommand": "sudo chown vscode:vscode .venv && uv sync --all-extras --frozen",
   "containerEnv": {
     "UV_LINK_MODE": "copy" // don't hardlink dependency files
