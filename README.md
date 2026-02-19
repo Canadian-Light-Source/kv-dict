@@ -42,3 +42,39 @@ uv run python examples/remote_mapping_redis_example.py
 
 Note: in the devcontainer compose setup, the Redis-compatible service hostname
 is `redis`.
+
+## Differences from Python `dict`
+
+`RemoteKVMapping` is intentionally `dict`-like, but not a byte-for-byte
+replacement of the built-in `dict` behavior.
+
+### Key behavioral differences
+
+- Iteration order is sorted by key, not insertion order.
+- Values are persisted through backend round-trips, so operations are not purely
+  in-memory.
+- Nested `dict` mutations are write-through, but mutable non-dict values (for
+  example, list `.append`) are not automatically persisted unless reassigned.
+
+### Missing / non-parity APIs
+
+- `copy()` is not implemented.
+- Dict union operators (`|` and `|=`) are not implemented.
+- `fromkeys()` is not implemented.
+
+### Practical guidance
+
+- Treat this mapping as a backend-backed structure, not an in-memory object.
+- For nested non-dict updates, reassign the modified value to persist changes.
+- If strict insertion-order semantics are required, do not rely on iteration
+  order from `RemoteKVMapping`.
+
+### Dict parity roadmap
+
+- [ ] Implement `copy()` semantics for backend-backed snapshots.
+- [ ] Implement dict union operators (`|`, `|=`).
+- [ ] Implement `fromkeys()` with explicit persistence semantics.
+- [ ] Add write-through wrappers for mutable non-dict containers (for example,
+      list operations).
+- [ ] Decide and document stable ordering strategy (sorted vs insertion-order).
+- [ ] Add dedicated parity tests against a reference `dict` behavior matrix.
