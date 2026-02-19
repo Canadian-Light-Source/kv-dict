@@ -171,10 +171,7 @@ Implement all abstract methods:
 
 ### Constructor
 
-```python
-class Backend():
-  ...
-
+```
 RemoteKVMapping(
     backend: Backend,
     entry_point: str,
@@ -188,11 +185,20 @@ RemoteKVMapping(
 
 ```python
 class Backend(ABC):
-    async def get(self, key: str) -> Optional[str]: pass
-    async def set(self, key: str, value: str) -> None: pass
-    async def delete(self, key: str) -> None: pass
-    async def list_keys(self, prefix: str) -> List[str]: pass
-    async def close(self): pass
+    async def get(self, key: str) -> Optional[str]:
+        pass
+
+    async def set(self, key: str, value: str) -> None:
+        pass
+
+    async def delete(self, key: str) -> None:
+        pass
+
+    async def list_keys(self, prefix: str) -> List[str]:
+        pass
+
+    async def close(self):
+        pass
 ```
 
 ### Nested Dict Reconstruction Logic
@@ -217,11 +223,7 @@ from your_module import RemoteKVMapping, RedisBackend, NatsBackend
 
 # With Redis backend
 redis_backend = RedisBackend(url="redis://localhost:6379")
-mapping = RemoteKVMapping(
-    backend=redis_backend,
-    entry_point="ep1",
-    sep=":"
-)
+mapping = RemoteKVMapping(backend=redis_backend, entry_point="ep1", sep=":")
 
 # Assuming Redis has: ep1:user:alice → '{"age": 30, "email": "alice@..."}'
 user = mapping["user"]  # → {"alice": {"age": 30, "email": "alice@..."}}

@@ -1,0 +1,23 @@
+services:
+  devcontainer:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+      args:
+        USER_UID: ${UID:-1000}
+        USER_GID: ${GID:-1000}
+    networks:
+      - dev-network
+    volumes:
+      - ..:/workspaces/kv_dict:cached
+    command: sleep infinity
+
+  redis:
+    image: "docker.dragonflydb.io/dragonflydb/dragonfly"
+    restart: unless-stopped
+    networks:
+      - dev-network
+
+networks:
+  dev-network:
+    driver: bridge
