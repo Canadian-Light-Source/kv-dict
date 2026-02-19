@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from inspect import isawaitable
-from typing import Any
+from typing import Any, override
 
 
 try:
@@ -35,6 +35,7 @@ class RedisBackend(Backend):
         client
             Optional injected client with ``get/set/delete/scan_iter/aclose`` API.
         """
+        super().__init__()
         self._url = url
         if client is not None:
             self._client = client
@@ -46,18 +47,22 @@ class RedisBackend(Backend):
 
         self._client = redis_async.from_url(url, decode_responses=True)
 
+    @override
     async def get(self, key: str) -> str | None:
         """Return raw value for key, or None when key does not exist."""
         return _normalize_string(await self._client.get(key))
 
+    @override
     async def set(self, key: str, value: str) -> None:
         """Store raw value for key."""
         await self._client.set(key, value)
 
+    @override
     async def delete(self, key: str) -> None:
         """Delete key if present."""
         await self._client.delete(key)
 
+    @override
     async def list_keys(self, prefix: str) -> list[str]:
         """List all keys beginning with prefix in sorted order."""
         keys: list[str] = []
@@ -67,6 +72,7 @@ class RedisBackend(Backend):
                 keys.append(normalized)
         return sorted(keys)
 
+    @override
     async def close(self) -> None:
         """Release backend resources."""
         close_method = getattr(self._client, "aclose", None)

@@ -7,6 +7,7 @@ class KeyMapper:
     """Map between backend KV keys and logical nested paths."""
 
     def __init__(self, entry_point: str, sep: str = ":") -> None:
+        super().__init__()
         if not entry_point:
             msg = "entry_point must not be empty"
             raise ValueError(msg)
