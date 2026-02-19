@@ -2,7 +2,7 @@
 
 # kv-dict
 
-KV bacjed dictionary, similar to RedisJSONDict
+KV backed dictionary, similar to RedisJSONDict
 
 ## Install Package
 
