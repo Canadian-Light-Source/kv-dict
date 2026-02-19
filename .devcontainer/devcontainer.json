@@ -2,9 +2,7 @@
   "name": "kv-dict-devcontainer",
   "build": {
     "dockerfile": "Dockerfile",
-    "options": [
-      "--platform=linux/amd64"
-    ],
+    "options": ["--platform=linux/amd64"],
     "args": {
       "USER_UID": "${localEnv:UID:1000}",
       "USER_GID": "${localEnv:GID:10000}"

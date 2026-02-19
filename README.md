@@ -15,7 +15,8 @@ KV bacjed dictionary, similar to RedisJSONDict
 ## Development
 
 This project uses `uv` for managing project dependencies. Installation
-instructions may be found [here](https://docs.astral.sh/uv/getting-started/installation/).
+instructions may be found
+[here](https://docs.astral.sh/uv/getting-started/installation/).
 
 ```bash
 git clone https://github.lightsource.ca/kiveln/kv-dict.git
@@ -32,6 +33,7 @@ uv run python examples/async_bridge_poc_example.py
 ```
 
 This example demonstrates:
+
 - `__set_item__` + `__get_time__` aliases
 - `__setitem__` + `__getitem__` via `mapping[key] = value` and `mapping[key]`
 - explicit `close()` cleanup
