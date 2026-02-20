@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from inspect import isawaitable
 from typing import Any, override
 
 
@@ -75,12 +74,4 @@ class RedisBackend(Backend):
     @override
     async def close(self) -> None:
         """Release backend resources."""
-        close_method = getattr(self._client, "aclose", None)
-        if close_method is None:
-            close_method = getattr(self._client, "close", None)
-        if close_method is None:
-            return
-
-        maybe_awaitable = close_method()
-        if isawaitable(maybe_awaitable):
-            await maybe_awaitable
+        _ = await self._client.aclose()

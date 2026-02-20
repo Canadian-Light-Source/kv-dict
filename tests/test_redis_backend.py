@@ -104,9 +104,9 @@ async def test_redis_backend_close_prefers_aclose() -> None:
 
 
 @pytest.mark.asyncio
-async def test_redis_backend_close_falls_back_to_close() -> None:
+async def test_redis_backend_close_requires_aclose() -> None:
     client = _FakeCloseOnlyClient()
     backend = RedisBackend(client=client)
 
-    await backend.close()
-    assert client.closed is True
+    with pytest.raises(AttributeError):
+        await backend.close()
