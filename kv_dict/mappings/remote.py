@@ -6,7 +6,7 @@ import asyncio
 import json
 import threading
 from collections.abc import Callable, Iterator, MutableMapping, MutableSequence
-from typing import TYPE_CHECKING, Any, Self, TypeVar, override
+from typing import TYPE_CHECKING, Any, Self, TypeVar, overload, override
 
 from kv_dict.key_mapping import KeyMapper, reconstruct_nested
 
@@ -37,8 +37,6 @@ def _to_plain(value: Any) -> Any:
 
 class _WriteThroughDict(MutableMapping[str, Any]):
     """Dict-like wrapper that persists parent mapping on mutation."""
-
-    __hash__ = None
 
     def __init__(self, data: dict[str, Any], on_change: Callable[[dict[str, Any]], None]) -> None:
         super().__init__()
@@ -95,11 +93,14 @@ class _WriteThroughDict(MutableMapping[str, Any]):
     def __eq__(self, other: object) -> bool:
         return self.to_plain_dict() == _to_plain(other)
 
+    @override
+    def __hash__(self) -> int:
+        msg = "unhashable type: '_WriteThroughDict'"
+        raise TypeError(msg)
+
 
 class _WriteThroughList(MutableSequence[Any]):
     """List-like wrapper that persists parent mapping on mutation."""
-
-    __hash__ = None
 
     def __init__(self, data: list[Any], on_change: Callable[[list[Any]], None]) -> None:
         super().__init__()
@@ -116,17 +117,33 @@ class _WriteThroughList(MutableSequence[Any]):
             return _WriteThroughList(value, lambda _updated: self._persist())
         return value
 
+    @overload
+    def __getitem__(self, index: int) -> Any: ...
+
+    @overload
+    def __getitem__(self, index: slice) -> list[Any]: ...
+
     @override
-    def __getitem__(self, index: int) -> Any:
+    def __getitem__(self, index: int | slice) -> Any:
+        if isinstance(index, slice):
+            return [_to_plain(item) for item in self._data[index]]
         return self._wrap_if_needed(self._data[index])
 
     @override
-    def __setitem__(self, index: int, value: Any) -> None:
+    def __setitem__(self, index: int | slice, value: Any) -> None:
+        if isinstance(index, slice):
+            if not isinstance(value, list):
+                msg = "slice assignment requires a list value"
+                raise TypeError(msg)
+            self._data[index] = [_to_plain(item) for item in value]
+            self._persist()
+            return
+
         self._data[index] = _to_plain(value)
         self._persist()
 
     @override
-    def __delitem__(self, index: int) -> None:
+    def __delitem__(self, index: int | slice) -> None:
         del self._data[index]
         self._persist()
 
@@ -149,6 +166,11 @@ class _WriteThroughList(MutableSequence[Any]):
     @override
     def __eq__(self, other: object) -> bool:
         return self.to_plain_list() == _to_plain(other)
+
+    @override
+    def __hash__(self) -> int:
+        msg = "unhashable type: '_WriteThroughList'"
+        raise TypeError(msg)
 
 
 class _AsyncLoopBridge:
@@ -274,13 +296,11 @@ class RemoteKVMapping(MutableMapping[str, Any]):
         """Return a detached plain-dict snapshot of current mapping contents."""
         return _to_plain(self._as_dict())
 
-    @override
     def __ior__(self, other: Any) -> Self:
         """Implement in-place union update semantics (``|=``)."""
         self.update(other)
         return self
 
-    @override
     def __or__(self, other: Any) -> dict[str, Any]:
         """Implement non-mutating union semantics (``|``) as detached snapshot."""
         result = self.copy()
