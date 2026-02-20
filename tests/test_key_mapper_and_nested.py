@@ -15,12 +15,22 @@ def test_key_mapper_rejects_invalid_inputs() -> None:
         _ = KeyMapper(entry_point="", sep=":")
     with pytest.raises(ValueError, match="sep must not be empty"):
         _ = KeyMapper(entry_point="ep1", sep="")
+    with pytest.raises(ValueError, match="entry_point must not contain separator"):
+        _ = KeyMapper(entry_point="ep:1", sep=":")
 
     mapper = KeyMapper(entry_point="ep1", sep=":")
+    with pytest.raises(ValueError, match="at least one key part is required"):
+        _ = mapper.full_key()
     with pytest.raises(ValueError, match="key parts must not be empty"):
         _ = mapper.full_key("")
     with pytest.raises(ValueError, match="key parts must not contain separator"):
         _ = mapper.full_key("bad:key")
+    with pytest.raises(ValueError, match="key does not match entry point prefix"):
+        _ = mapper.relative_parts("ep2:main")
+    with pytest.raises(ValueError, match="relative key path must not be empty"):
+        _ = mapper.relative_parts("ep1:")
+    with pytest.raises(ValueError, match="invalid key path with empty segment"):
+        _ = mapper.relative_parts("ep1:main::child")
 
 
 def test_reconstruct_nested_no_conflict() -> None:
