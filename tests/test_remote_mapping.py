@@ -1,3 +1,4 @@
+import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -125,5 +126,41 @@ def test_remote_mapping_multi_key_property(payload: dict[str, object]) -> None:
         assert list(mapping) == sorted(payload.keys())
         for key, expected in payload.items():
             assert mapping[key] == expected
+    finally:
+        mapping.close()
+
+
+def test_remote_mapping_ior_with_mapping_operand() -> None:
+    updated_a = 2
+    updated_b = 3
+    backend = InMemoryAsyncBackend()
+    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+    try:
+        mapping["a"] = 1
+        result = mapping.__ior__({"a": updated_a, "b": updated_b})
+        assert result is mapping
+        assert mapping["a"] == updated_a
+        assert mapping["b"] == updated_b
+    finally:
+        mapping.close()
+
+
+def test_remote_mapping_ior_with_iterable_pairs_operand() -> None:
+    backend = InMemoryAsyncBackend()
+    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+    try:
+        mapping |= [("x", {"value": 1}), ("y", {"value": 2})]
+        assert mapping["x"] == {"value": 1}
+        assert mapping["y"] == {"value": 2}
+    finally:
+        mapping.close()
+
+
+def test_remote_mapping_ior_invalid_operand_raises_type_error() -> None:
+    backend = InMemoryAsyncBackend()
+    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+    try:
+        with pytest.raises(TypeError):
+            mapping |= 42
     finally:
         mapping.close()

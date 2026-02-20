@@ -6,7 +6,7 @@ import asyncio
 import json
 import threading
 from collections.abc import Callable, Iterator, MutableMapping
-from typing import TYPE_CHECKING, Any, TypeVar, override
+from typing import TYPE_CHECKING, Any, Self, TypeVar, override
 
 from kv_dict.key_mapping import KeyMapper, reconstruct_nested
 
@@ -206,6 +206,12 @@ class RemoteKVMapping(MutableMapping[str, Any]):
     def copy(self) -> dict[str, Any]:
         """Return a detached plain-dict snapshot of current mapping contents."""
         return _to_plain(self._as_dict())
+
+    @override
+    def __ior__(self, other: Any) -> Self:
+        """Implement in-place union update semantics (``|=``)."""
+        self.update(other)
+        return self
 
     @override
     def __repr__(self) -> str:
