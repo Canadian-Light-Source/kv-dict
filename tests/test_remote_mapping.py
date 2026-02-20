@@ -113,6 +113,38 @@ def test_remote_mapping_returns_write_through_dict_wrappers(mapping: RemoteKVMap
     assert isinstance(result["alice"], _WriteThroughDict)
 
 
+@given(
+    users=st.dictionaries(
+        keys=st.text(min_size=1, max_size=12),
+        values=st.dictionaries(keys=st.text(min_size=1, max_size=8), values=st.integers(), max_size=3),
+        min_size=2,
+        max_size=6,
+    ),
+)
+def test_remote_mapping_write_through_dict_iter_len_delete_persist(
+    users: dict[str, dict[str, int]],
+) -> None:
+    backend = InMemoryAsyncBackend()
+    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+    try:
+        mapping["user"] = users
+        user = mapping["user"]
+
+        assert isinstance(user, _WriteThroughDict)
+        assert set(user) == set(users)
+        assert len(user) == len(users)
+
+        removed_key = next(iter(users))
+        del user[removed_key]
+
+        expected = dict(users)
+        del expected[removed_key]
+        assert len(user) == len(expected)
+        assert mapping["user"] == expected
+    finally:
+        mapping.close()
+
+
 def test_remote_mapping_returns_write_through_list_wrappers(mapping: RemoteKVMapping) -> None:
     mapping["arr"] = [1, {"nested": [2, 3]}, [4, 5]]
     result = mapping["arr"]
