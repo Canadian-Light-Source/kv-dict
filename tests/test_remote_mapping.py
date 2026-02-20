@@ -81,6 +81,21 @@ def test_remote_mapping_top_level_list_item_assignment_persists(mapping: RemoteK
     assert mapping["arr"] == [1, 9, 3]
 
 
+def test_remote_mapping_top_level_list_slice_assignment_persists(mapping: RemoteKVMapping) -> None:
+    mapping["arr"] = [1, 2, 3, 4]
+    mapping["arr"][0:2] = [9, 8]
+    assert mapping["arr"] == [9, 8, 3, 4]
+
+
+def test_remote_mapping_top_level_list_slice_assignment_non_list_raises_type_error(
+    mapping: RemoteKVMapping,
+) -> None:
+    mapping["arr"] = [1, 2, 3, 4]
+
+    with pytest.raises(TypeError, match="slice assignment requires a list value"):
+        mapping["arr"][0:2] = (9, 8)
+
+
 def test_remote_mapping_tuple_roundtrip(mapping: RemoteKVMapping) -> None:
     value = (1, "two", True)
     mapping["tuple_value"] = value
