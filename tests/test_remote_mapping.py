@@ -87,9 +87,7 @@ def test_remote_mapping_top_level_list_slice_assignment_persists(mapping: Remote
     assert mapping["arr"] == [9, 8, 3, 4]
 
 
-def test_remote_mapping_top_level_list_slice_assignment_non_list_raises_type_error(
-    mapping: RemoteKVMapping,
-) -> None:
+def test_remote_mapping_top_level_list_slice_assignment_non_list_raises_type_error(mapping: RemoteKVMapping) -> None:
     mapping["arr"] = [1, 2, 3, 4]
 
     with pytest.raises(TypeError, match="slice assignment requires a list value"):
