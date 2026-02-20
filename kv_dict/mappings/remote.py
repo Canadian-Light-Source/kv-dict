@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import threading
-from collections.abc import Callable, Iterator, MutableMapping
+from collections.abc import Callable, Iterator, MutableMapping, MutableSequence
 from typing import TYPE_CHECKING, Any, Self, TypeVar, override
 
 from kv_dict.key_mapping import KeyMapper, reconstruct_nested
@@ -24,6 +24,8 @@ _T = TypeVar("_T")
 def _to_plain(value: Any) -> Any:
     if isinstance(value, _WriteThroughDict):
         return value.to_plain_dict()
+    if isinstance(value, _WriteThroughList):
+        return value.to_plain_list()
     if isinstance(value, dict):
         return {k: _to_plain(v) for k, v in value.items()}
     if isinstance(value, list):
@@ -36,6 +38,8 @@ def _to_plain(value: Any) -> Any:
 class _WriteThroughDict(MutableMapping[str, Any]):
     """Dict-like wrapper that persists parent mapping on mutation."""
 
+    __hash__ = None
+
     def __init__(self, data: dict[str, Any], on_change: Callable[[dict[str, Any]], None]) -> None:
         super().__init__()
         self._data = data
@@ -47,6 +51,8 @@ class _WriteThroughDict(MutableMapping[str, Any]):
     def _wrap_if_needed(self, value: Any) -> Any:
         if isinstance(value, dict):
             return _WriteThroughDict(value, lambda _updated: self._persist())
+        if isinstance(value, list):
+            return _WriteThroughList(value, lambda _updated: self._persist())
         return value
 
     @override
@@ -84,6 +90,65 @@ class _WriteThroughDict(MutableMapping[str, Any]):
     @override
     def __repr__(self) -> str:
         return repr(self.to_plain_dict())
+
+    @override
+    def __eq__(self, other: object) -> bool:
+        return self.to_plain_dict() == _to_plain(other)
+
+
+class _WriteThroughList(MutableSequence[Any]):
+    """List-like wrapper that persists parent mapping on mutation."""
+
+    __hash__ = None
+
+    def __init__(self, data: list[Any], on_change: Callable[[list[Any]], None]) -> None:
+        super().__init__()
+        self._data = data
+        self._on_change = on_change
+
+    def _persist(self) -> None:
+        self._on_change(self.to_plain_list())
+
+    def _wrap_if_needed(self, value: Any) -> Any:
+        if isinstance(value, dict):
+            return _WriteThroughDict(value, lambda _updated: self._persist())
+        if isinstance(value, list):
+            return _WriteThroughList(value, lambda _updated: self._persist())
+        return value
+
+    @override
+    def __getitem__(self, index: int) -> Any:
+        return self._wrap_if_needed(self._data[index])
+
+    @override
+    def __setitem__(self, index: int, value: Any) -> None:
+        self._data[index] = _to_plain(value)
+        self._persist()
+
+    @override
+    def __delitem__(self, index: int) -> None:
+        del self._data[index]
+        self._persist()
+
+    @override
+    def __len__(self) -> int:
+        return len(self._data)
+
+    @override
+    def insert(self, index: int, value: Any) -> None:
+        self._data.insert(index, _to_plain(value))
+        self._persist()
+
+    def to_plain_list(self) -> list[Any]:
+        return [_to_plain(item) for item in self._data]
+
+    @override
+    def __repr__(self) -> str:
+        return repr(self.to_plain_list())
+
+    @override
+    def __eq__(self, other: object) -> bool:
+        return self.to_plain_list() == _to_plain(other)
 
 
 class _AsyncLoopBridge:
@@ -168,6 +233,8 @@ class RemoteKVMapping(MutableMapping[str, Any]):
         result = reconstruct_nested(pairs)
         if isinstance(result, dict):
             return _WriteThroughDict(result, lambda updated: self.__setitem__(key, updated))
+        if isinstance(result, list):
+            return _WriteThroughList(result, lambda updated: self.__setitem__(key, updated))
         return result
 
     @override

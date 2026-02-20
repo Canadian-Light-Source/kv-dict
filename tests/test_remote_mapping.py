@@ -88,6 +88,28 @@ def test_remote_mapping_nested_item_assignment_persists() -> None:
         mapping.close()
 
 
+def test_remote_mapping_nested_list_item_assignment_persists() -> None:
+    backend = InMemoryAsyncBackend()
+    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+    try:
+        mapping["a_list"] = {"a": [1, 1, 1]}
+        mapping["a_list"]["a"][0] = 99
+        assert mapping["a_list"]["a"] == [99, 1, 1]
+    finally:
+        mapping.close()
+
+
+def test_remote_mapping_top_level_list_item_assignment_persists() -> None:
+    backend = InMemoryAsyncBackend()
+    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+    try:
+        mapping["arr"] = [1, 2, 3]
+        mapping["arr"][1] = 9
+        assert mapping["arr"] == [1, 9, 3]
+    finally:
+        mapping.close()
+
+
 def test_remote_mapping_copy_returns_plain_detached_snapshot() -> None:
     expected_age = 30
     backend = InMemoryAsyncBackend()

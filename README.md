@@ -53,8 +53,8 @@ replacement of the built-in `dict` behavior.
 - Iteration order is sorted by key, not insertion order.
 - Values are persisted through backend round-trips, so operations are not purely
   in-memory.
-- Nested `dict` mutations are write-through, but mutable non-dict values (for
-  example, list `.append`) are not automatically persisted unless reassigned.
+- Nested `dict` and `list` mutations are write-through.
+- Mutable non-dict/non-list values are not automatically write-through.
 
 ### Missing / non-parity APIs
 
@@ -73,7 +73,8 @@ replacement of the built-in `dict` behavior.
 - [x] Implement in-place dict union operator (`|=`).
 - [x] Implement dict union operator (`|`).
 - [ ] Implement `fromkeys()` with explicit persistence semantics.
-- [ ] Add write-through wrappers for mutable non-dict containers (for example,
-      list operations).
+- [x] Add write-through wrappers for list operations.
+- [ ] Add write-through wrappers for additional mutable container types (if
+  required).
 - [ ] Decide and document stable ordering strategy (sorted vs insertion-order).
 - [ ] Add dedicated parity tests against a reference `dict` behavior matrix.
