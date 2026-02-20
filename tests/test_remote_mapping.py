@@ -81,6 +81,18 @@ def test_remote_mapping_top_level_list_item_assignment_persists(mapping: RemoteK
     assert mapping["arr"] == [1, 9, 3]
 
 
+def test_remote_mapping_tuple_roundtrip(mapping: RemoteKVMapping) -> None:
+    value = (1, "two", True)
+    mapping["tuple_value"] = value
+    assert mapping["tuple_value"] == [1, "two", True]
+
+
+def test_remote_mapping_nested_tuple_containing_list_persists_updates(mapping: RemoteKVMapping) -> None:
+    mapping["tuple_nested"] = ({"items": [1, 2]}, "tail")
+    mapping["tuple_nested"][0]["items"][0] = 99
+    assert mapping["tuple_nested"] == [{"items": [99, 2]}, "tail"]
+
+
 def test_remote_mapping_returns_write_through_dict_wrappers(mapping: RemoteKVMapping) -> None:
     mapping["user"] = {"alice": {"age": 30}}
     result = mapping["user"]
@@ -89,11 +101,13 @@ def test_remote_mapping_returns_write_through_dict_wrappers(mapping: RemoteKVMap
 
 
 def test_remote_mapping_returns_write_through_list_wrappers(mapping: RemoteKVMapping) -> None:
-    mapping["arr"] = [1, {"nested": [2, 3]}]
+    mapping["arr"] = [1, {"nested": [2, 3]}, [4, 5]]
     result = mapping["arr"]
     assert isinstance(result, _WriteThroughList)
+    assert result[0] == 1
     assert isinstance(result[1], _WriteThroughDict)
     assert isinstance(result[1]["nested"], _WriteThroughList)
+    assert isinstance(result[2], _WriteThroughList)
 
 
 def test_remote_mapping_copy_returns_plain_detached_snapshot(mapping: RemoteKVMapping) -> None:
