@@ -54,6 +54,37 @@ uv run python examples/remote_mapping_nats_example.py
 Note: this example uses `create_bucket=False` (production-style). Ensure the
 `kv_dict` bucket already exists.
 
+<details>
+<summary>Create the <code>kv_dict</code> bucket locally (for testing)</summary>
+
+Run this once before executing the NATS example:
+
+```bash
+uv run python - <<'PY'
+import asyncio
+import nats
+
+
+async def main() -> None:
+  nc = await nats.connect(servers=["nats://nats:4222"])
+  try:
+    js = nc.jetstream()
+    try:
+      await js.key_value("kv_dict")
+      print("Bucket already exists: kv_dict")
+    except Exception:
+      await js.create_key_value(bucket="kv_dict")
+      print("Created bucket: kv_dict")
+  finally:
+    await nc.close()
+
+
+asyncio.run(main())
+PY
+```
+
+</details>
+
 ## Differences from Python `dict`
 
 `RemoteKVMapping` is intentionally `dict`-like, but not a byte-for-byte
