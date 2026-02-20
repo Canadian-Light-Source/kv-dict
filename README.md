@@ -54,6 +54,9 @@ uv run python examples/remote_mapping_nats_example.py
 Note: this example uses `create_bucket=False` (production-style). Ensure the
 `kv_dict` bucket already exists.
 
+In the devcontainer compose setup, NATS is also available to host-side tools at
+`nats://127.0.0.1:14222`.
+
 <details>
 <summary>Create the <code>kv_dict</code> bucket locally (for testing)</summary>
 
