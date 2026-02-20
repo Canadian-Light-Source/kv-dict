@@ -43,6 +43,17 @@ uv run python examples/remote_mapping_redis_example.py
 Note: in the devcontainer compose setup, the Redis-compatible service hostname
 is `redis`.
 
+## Remote Mapping + NATS JetStream KV Backend Example
+
+Run a basic `RemoteKVMapping` flow backed by NATS JetStream KV:
+
+```bash
+uv run python examples/remote_mapping_nats_example.py
+```
+
+Note: this example uses `create_bucket=False` (production-style). Ensure the
+`kv_dict` bucket already exists.
+
 ## Differences from Python `dict`
 
 `RemoteKVMapping` is intentionally `dict`-like, but not a byte-for-byte
