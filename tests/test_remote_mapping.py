@@ -5,7 +5,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 from kv_dict.backends.in_memory import InMemoryAsyncBackend
-from kv_dict.mappings.remote import RemoteKVMapping, _WriteThroughDict, _WriteThroughList
+from kv_dict.mappings.remote import RemoteKVMapping, _AsyncLoopBridge, _WriteThroughDict, _WriteThroughList
 
 
 _KEYS = st.text(min_size=1, max_size=20).filter(lambda value: ":" not in value)
@@ -168,6 +168,51 @@ def test_remote_mapping_returns_write_through_list_wrappers(mapping: RemoteKVMap
     assert isinstance(result[1], _WriteThroughDict)
     assert isinstance(result[1]["nested"], _WriteThroughList)
     assert isinstance(result[2], _WriteThroughList)
+
+
+def test_write_through_dict_hash_raises_type_error(mapping: RemoteKVMapping) -> None:
+    mapping["user"] = {"alice": {"age": 30}}
+    user = mapping["user"]
+
+    with pytest.raises(TypeError, match="unhashable type: '_WriteThroughDict'"):
+        hash(user)
+
+
+def test_write_through_list_hash_raises_type_error(mapping: RemoteKVMapping) -> None:
+    mapping["arr"] = [1, 2, 3]
+    arr = mapping["arr"]
+
+    with pytest.raises(TypeError, match="unhashable type: '_WriteThroughList'"):
+        hash(arr)
+
+
+def test_async_loop_bridge_run_raises_runtime_error_when_loop_is_uninitialized() -> None:
+    bridge = _AsyncLoopBridge()
+    original_loop = bridge._loop
+    try:
+        bridge._loop = None
+        with pytest.raises(RuntimeError, match="remote mapping async loop not initialized"):
+            bridge.run(None)  # type: ignore[arg-type]
+    finally:
+        bridge._loop = original_loop
+        bridge.close()
+
+
+def test_remote_mapping_getitem_raises_key_error_when_backend_gets_none(mapping: RemoteKVMapping) -> None:
+    mapping["user"] = {"alice": {"age": 30}}
+
+    async def always_none(_key: str) -> str | None:
+        return None
+
+    mapping._backend.get = always_none  # type: ignore[method-assign]
+
+    with pytest.raises(KeyError, match="user"):
+        _ = mapping["user"]
+
+
+def test_remote_mapping_delitem_missing_key_raises_key_error(mapping: RemoteKVMapping) -> None:
+    with pytest.raises(KeyError, match="missing"):
+        del mapping["missing"]
 
 
 def test_remote_mapping_copy_returns_plain_detached_snapshot(mapping: RemoteKVMapping) -> None:
