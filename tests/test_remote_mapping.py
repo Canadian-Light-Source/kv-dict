@@ -3,7 +3,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 from kv_dict.backends.in_memory import InMemoryAsyncBackend
-from kv_dict.mappings.remote import RemoteKVMapping
+from kv_dict.mappings.remote import RemoteKVMapping, _WriteThroughDict, _WriteThroughList
 
 
 _KEYS = st.text(min_size=1, max_size=20).filter(lambda value: ":" not in value)
@@ -106,6 +106,31 @@ def test_remote_mapping_top_level_list_item_assignment_persists() -> None:
         mapping["arr"] = [1, 2, 3]
         mapping["arr"][1] = 9
         assert mapping["arr"] == [1, 9, 3]
+    finally:
+        mapping.close()
+
+
+def test_remote_mapping_returns_write_through_dict_wrappers() -> None:
+    backend = InMemoryAsyncBackend()
+    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+    try:
+        mapping["user"] = {"alice": {"age": 30}}
+        result = mapping["user"]
+        assert isinstance(result, _WriteThroughDict)
+        assert isinstance(result["alice"], _WriteThroughDict)
+    finally:
+        mapping.close()
+
+
+def test_remote_mapping_returns_write_through_list_wrappers() -> None:
+    backend = InMemoryAsyncBackend()
+    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+    try:
+        mapping["arr"] = [1, {"nested": [2, 3]}]
+        result = mapping["arr"]
+        assert isinstance(result, _WriteThroughList)
+        assert isinstance(result[1], _WriteThroughDict)
+        assert isinstance(result[1]["nested"], _WriteThroughList)
     finally:
         mapping.close()
 
