@@ -214,6 +214,13 @@ class RemoteKVMapping(MutableMapping[str, Any]):
         return self
 
     @override
+    def __or__(self, other: Any) -> dict[str, Any]:
+        """Implement non-mutating union semantics (``|``) as detached snapshot."""
+        result = self.copy()
+        result.update(other)
+        return result
+
+    @override
     def __repr__(self) -> str:
         """Represent mapping as a plain dictionary string."""
         return repr(self._as_dict())

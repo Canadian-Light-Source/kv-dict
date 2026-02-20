@@ -58,7 +58,6 @@ replacement of the built-in `dict` behavior.
 
 ### Missing / non-parity APIs
 
-- Dict union operator `|` is not implemented.
 - `fromkeys()` is not implemented.
 
 ### Practical guidance
@@ -72,7 +71,7 @@ replacement of the built-in `dict` behavior.
 
 - [x] Implement `copy()` semantics for backend-backed snapshots.
 - [x] Implement in-place dict union operator (`|=`).
-- [ ] Implement dict union operator (`|`).
+- [x] Implement dict union operator (`|`).
 - [ ] Implement `fromkeys()` with explicit persistence semantics.
 - [ ] Add write-through wrappers for mutable non-dict containers (for example,
       list operations).

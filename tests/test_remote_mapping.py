@@ -164,3 +164,46 @@ def test_remote_mapping_ior_invalid_operand_raises_type_error() -> None:
             mapping |= 42
     finally:
         mapping.close()
+
+
+def test_remote_mapping_or_returns_detached_merged_snapshot() -> None:
+    backend = InMemoryAsyncBackend()
+    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+    try:
+        mapping["a"] = {"value": 1}
+        merged = mapping | {"a": {"value": 2}, "b": {"value": 3}}
+
+        assert merged == {"a": {"value": 2}, "b": {"value": 3}}
+        assert isinstance(merged, dict)
+
+        assert mapping["a"] == {"value": 1}
+        with pytest.raises(KeyError):
+            _ = mapping["b"]
+    finally:
+        mapping.close()
+
+
+def test_remote_mapping_or_invalid_operand_raises_type_error() -> None:
+    backend = InMemoryAsyncBackend()
+    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+    try:
+        with pytest.raises(TypeError):
+            _ = mapping | 42
+    finally:
+        mapping.close()
+
+
+@given(
+    base=st.dictionaries(keys=_KEYS, values=_JSON_VALUES, max_size=8),
+    other=st.dictionaries(keys=_KEYS, values=_JSON_VALUES, max_size=8),
+)
+def test_remote_mapping_or_matches_dict_union_property(base: dict[str, object], other: dict[str, object]) -> None:
+    backend = InMemoryAsyncBackend()
+    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+    try:
+        mapping.update(base)
+        expected = dict(base) | dict(other)
+        assert (mapping | other) == expected
+        assert mapping.copy() == base
+    finally:
+        mapping.close()
