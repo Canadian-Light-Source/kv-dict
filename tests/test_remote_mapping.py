@@ -130,6 +130,18 @@ def test_remote_mapping_multi_key_property(payload: dict[str, object]) -> None:
         mapping.close()
 
 
+def _assert_ior(mapping: RemoteKVMapping, operand: object, expected: dict[str, object]) -> None:
+    result = mapping.__ior__(operand)
+    assert result is mapping
+    assert mapping.copy() == expected
+
+
+def _assert_or(mapping: RemoteKVMapping, operand: object, expected: dict[str, object]) -> None:
+    merged = mapping | operand
+    assert merged == expected
+    assert isinstance(merged, dict)
+
+
 def test_remote_mapping_ior_with_mapping_operand() -> None:
     updated_a = 2
     updated_b = 3
@@ -137,10 +149,7 @@ def test_remote_mapping_ior_with_mapping_operand() -> None:
     mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
     try:
         mapping["a"] = 1
-        result = mapping.__ior__({"a": updated_a, "b": updated_b})
-        assert result is mapping
-        assert mapping["a"] == updated_a
-        assert mapping["b"] == updated_b
+        _assert_ior(mapping, {"a": updated_a, "b": updated_b}, {"a": updated_a, "b": updated_b})
     finally:
         mapping.close()
 
@@ -149,9 +158,7 @@ def test_remote_mapping_ior_with_iterable_pairs_operand() -> None:
     backend = InMemoryAsyncBackend()
     mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
     try:
-        mapping |= [("x", {"value": 1}), ("y", {"value": 2})]
-        assert mapping["x"] == {"value": 1}
-        assert mapping["y"] == {"value": 2}
+        _assert_ior(mapping, [("x", {"value": 1}), ("y", {"value": 2})], {"x": {"value": 1}, "y": {"value": 2}})
     finally:
         mapping.close()
 
@@ -166,29 +173,26 @@ def test_remote_mapping_ior_invalid_operand_raises_type_error() -> None:
         mapping.close()
 
 
-def test_remote_mapping_or_returns_detached_merged_snapshot() -> None:
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
-    try:
-        mapping["a"] = {"value": 1}
-        merged = mapping | {"a": {"value": 2}, "b": {"value": 3}}
-
-        assert merged == {"a": {"value": 2}, "b": {"value": 3}}
-        assert isinstance(merged, dict)
-
-        assert mapping["a"] == {"value": 1}
-        with pytest.raises(KeyError):
-            _ = mapping["b"]
-    finally:
-        mapping.close()
-
-
 def test_remote_mapping_or_invalid_operand_raises_type_error() -> None:
     backend = InMemoryAsyncBackend()
     mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
     try:
         with pytest.raises(TypeError):
             _ = mapping | 42
+    finally:
+        mapping.close()
+
+
+def test_remote_mapping_or_returns_detached_merged_snapshot() -> None:
+    backend = InMemoryAsyncBackend()
+    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+    try:
+        mapping["a"] = {"value": 1}
+        _assert_or(mapping, {"a": {"value": 2}, "b": {"value": 3}}, {"a": {"value": 2}, "b": {"value": 3}})
+
+        assert mapping["a"] == {"value": 1}
+        with pytest.raises(KeyError):
+            _ = mapping["b"]
     finally:
         mapping.close()
 
@@ -203,7 +207,7 @@ def test_remote_mapping_or_matches_dict_union_property(base: dict[str, object], 
     try:
         mapping.update(base)
         expected = dict(base) | dict(other)
-        assert (mapping | other) == expected
+        _assert_or(mapping, other, expected)
         assert mapping.copy() == base
     finally:
         mapping.close()
