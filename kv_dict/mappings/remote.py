@@ -6,7 +6,7 @@ import asyncio
 import json
 import threading
 from collections.abc import Callable, Iterator, MutableMapping, MutableSequence
-from typing import TYPE_CHECKING, Any, Self, TypeVar, overload, override
+from typing import TYPE_CHECKING, Any, Self, TypeVar, cast, overload, override
 
 from kv_dict.key_mapping import KeyMapper, reconstruct_nested
 
@@ -35,6 +35,14 @@ def _to_plain(value: Any) -> Any:
     return value
 
 
+def _wrap_write_through(value: Any, on_change: Callable[[Any], None]) -> Any:
+    if isinstance(value, dict):
+        return _WriteThroughDict(value, cast("Callable[[dict[str, Any]], None]", on_change))
+    if isinstance(value, list):
+        return _WriteThroughList(value, cast("Callable[[list[Any]], None]", on_change))
+    return value
+
+
 class _WriteThroughDict(MutableMapping[str, Any]):
     """Dict-like wrapper that persists parent mapping on mutation."""
 
@@ -47,11 +55,7 @@ class _WriteThroughDict(MutableMapping[str, Any]):
         self._on_change(self.to_plain_dict())
 
     def _wrap_if_needed(self, value: Any) -> Any:
-        if isinstance(value, dict):
-            return _WriteThroughDict(value, lambda _updated: self._persist())
-        if isinstance(value, list):
-            return _WriteThroughList(value, lambda _updated: self._persist())
-        return value
+        return _wrap_write_through(value, lambda _updated: self._persist())
 
     @override
     def __getitem__(self, key: str) -> Any:
@@ -111,11 +115,7 @@ class _WriteThroughList(MutableSequence[Any]):
         self._on_change(self.to_plain_list())
 
     def _wrap_if_needed(self, value: Any) -> Any:
-        if isinstance(value, dict):
-            return _WriteThroughDict(value, lambda _updated: self._persist())
-        if isinstance(value, list):
-            return _WriteThroughList(value, lambda _updated: self._persist())
-        return value
+        return _wrap_write_through(value, lambda _updated: self._persist())
 
     @overload
     def __getitem__(self, index: int) -> Any: ...
@@ -254,11 +254,7 @@ class RemoteKVMapping(MutableMapping[str, Any]):
             raise KeyError(key)
 
         result = reconstruct_nested(pairs)
-        if isinstance(result, dict):
-            return _WriteThroughDict(result, lambda updated: self.__setitem__(key, updated))
-        if isinstance(result, list):
-            return _WriteThroughList(result, lambda updated: self.__setitem__(key, updated))
-        return result
+        return _wrap_write_through(result, lambda updated: self.__setitem__(key, updated))
 
     @override
     def __setitem__(self, key: str, value: Any) -> None:
