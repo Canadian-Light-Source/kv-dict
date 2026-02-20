@@ -131,10 +131,11 @@ class _WriteThroughList(MutableSequence[Any]):
 
     @override
     def __setitem__(self, index: int | slice, value: Any) -> None:
+        if isinstance(index, slice) and not isinstance(value, list):
+            msg = "slice assignment requires a list value"
+            raise TypeError(msg)
+
         if isinstance(index, slice):
-            if not isinstance(value, list):
-                msg = "slice assignment requires a list value"
-                raise TypeError(msg)
             self._data[index] = [_to_plain(item) for item in value]
             self._persist()
             return
