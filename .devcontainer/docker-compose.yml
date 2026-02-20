@@ -22,6 +22,8 @@ services:
     image: "nats:2.12-alpine"
     command: ["-js"]
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:14222:4222"
     networks:
       - dev-network
 
