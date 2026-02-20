@@ -94,6 +94,23 @@ def test_remote_mapping_top_level_list_slice_assignment_non_list_raises_type_err
         mapping["arr"][0:2] = (9, 8)
 
 
+def test_remote_mapping_top_level_list_slice_getitem_returns_plain_list(mapping: RemoteKVMapping) -> None:
+    mapping["arr"] = [1, {"nested": 2}, [3, 4], 5]
+
+    result = mapping["arr"][0:3]
+
+    assert result == [1, {"nested": 2}, [3, 4]]
+    assert isinstance(result, list)
+
+
+def test_remote_mapping_top_level_list_slice_delete_persists(mapping: RemoteKVMapping) -> None:
+    mapping["arr"] = [1, 2, 3, 4, 5]
+
+    del mapping["arr"][1:4]
+
+    assert mapping["arr"] == [1, 5]
+
+
 def test_remote_mapping_tuple_roundtrip(mapping: RemoteKVMapping) -> None:
     value = (1, "two", True)
     mapping["tuple_value"] = value
@@ -119,11 +136,9 @@ def test_remote_mapping_returns_write_through_dict_wrappers(mapping: RemoteKVMap
         values=st.dictionaries(keys=st.text(min_size=1, max_size=8), values=st.integers(), max_size=3),
         min_size=2,
         max_size=6,
-    ),
+    )
 )
-def test_remote_mapping_write_through_dict_iter_len_delete_persist(
-    users: dict[str, dict[str, int]],
-) -> None:
+def test_remote_mapping_write_through_dict_iter_len_delete_persist(users: dict[str, dict[str, int]]) -> None:
     backend = InMemoryAsyncBackend()
     mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
     try:
