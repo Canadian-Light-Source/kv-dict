@@ -2,7 +2,7 @@
   "name": "kv-dict-devcontainer",
   "dockerComposeFile": "docker-compose.yml",
   "service": "devcontainer",
-  "runServices": ["devcontainer", "redis"],
+  "runServices": ["devcontainer", "redis", "nats"],
   "shutdownAction": "stopCompose",
   "remoteUser": "vscode",
   "updateRemoteUserUID": true,
