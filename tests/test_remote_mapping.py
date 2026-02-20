@@ -1,3 +1,5 @@
+from collections.abc import Generator
+
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
@@ -15,141 +17,95 @@ _JSON_VALUES = st.recursive(
 )
 
 
-def test_remote_mapping_set_get_delete_and_len() -> None:
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
+@pytest.fixture
+def mapping() -> Generator[RemoteKVMapping]:
+    test_mapping = RemoteKVMapping(backend=InMemoryAsyncBackend(), entry_point="ep1", sep=":")
     try:
-        mapping["user"] = {"alice": {"age": 30}}
-        assert mapping["user"] == {"alice": {"age": 30}}
-        assert len(mapping) == 1
-        assert list(mapping) == ["user"]
-
-        del mapping["user"]
-        assert len(mapping) == 0
+        yield test_mapping
     finally:
-        mapping.close()
+        test_mapping.close()
 
 
-def test_remote_mapping_reconstructs_nested_children_under_top_key() -> None:
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
-    try:
-        mapping._bridge.run(backend.set("ep1:main:sup1", '{"key": "value"}'))
-        mapping._bridge.run(backend.set("ep1:main:sup2", "[1, 2, 3]"))
+def test_remote_mapping_set_get_delete_and_len(mapping: RemoteKVMapping) -> None:
+    mapping["user"] = {"alice": {"age": 30}}
+    assert mapping["user"] == {"alice": {"age": 30}}
+    assert len(mapping) == 1
+    assert list(mapping) == ["user"]
 
-        assert mapping["main"] == {"sup1": {"key": "value"}, "sup2": [1, 2, 3]}
-    finally:
-        mapping.close()
+    del mapping["user"]
+    assert len(mapping) == 0
 
 
-def test_remote_mapping_conflict_scalar_leaf_plus_child() -> None:
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
-    try:
-        mapping._bridge.run(backend.set("ep1:main", "[1, 2, 3]"))
-        mapping._bridge.run(backend.set("ep1:main:sub", '{"nested": true}'))
+def test_remote_mapping_reconstructs_nested_children_under_top_key(mapping: RemoteKVMapping) -> None:
+    mapping._bridge.run(mapping._backend.set("ep1:main:sup1", '{"key": "value"}'))
+    mapping._bridge.run(mapping._backend.set("ep1:main:sup2", "[1, 2, 3]"))
 
-        assert mapping["main"] == {"_value": [1, 2, 3], "sub": {"nested": True}}
-    finally:
-        mapping.close()
+    assert mapping["main"] == {"sup1": {"key": "value"}, "sup2": [1, 2, 3]}
 
 
-def test_remote_mapping_repr_and_str_are_dict_like() -> None:
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
-    try:
-        mapping["user"] = {"alice": {"age": 30}}
-        expected = "{'user': {'alice': {'age': 30}}}"
-        assert repr(mapping) == expected
-        assert str(mapping) == expected
-    finally:
-        mapping.close()
+def test_remote_mapping_conflict_scalar_leaf_plus_child(mapping: RemoteKVMapping) -> None:
+    mapping._bridge.run(mapping._backend.set("ep1:main", "[1, 2, 3]"))
+    mapping._bridge.run(mapping._backend.set("ep1:main:sub", '{"nested": true}'))
+
+    assert mapping["main"] == {"_value": [1, 2, 3], "sub": {"nested": True}}
 
 
-def test_remote_mapping_nested_update_persists() -> None:
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
-    try:
-        mapping["3d"] = {"x": [1, 2, 3], "y": [3, 2, 1], "z": [0, 0, 0]}
-        mapping["3d"].update({"a": [1, 1, 1]})
-        assert mapping["3d"]["a"] == [1, 1, 1]
-    finally:
-        mapping.close()
+def test_remote_mapping_repr_and_str_are_dict_like(mapping: RemoteKVMapping) -> None:
+    mapping["user"] = {"alice": {"age": 30}}
+    expected = "{'user': {'alice': {'age': 30}}}"
+    assert repr(mapping) == expected
+    assert str(mapping) == expected
 
 
-def test_remote_mapping_nested_item_assignment_persists() -> None:
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
-    try:
-        mapping["user"] = {"alice": {"age": 30}}
-        mapping["user"]["alice"]["email"] = "alice@example.com"
-        assert mapping["user"]["alice"]["email"] == "alice@example.com"
-    finally:
-        mapping.close()
+def test_remote_mapping_nested_update_persists(mapping: RemoteKVMapping) -> None:
+    mapping["3d"] = {"x": [1, 2, 3], "y": [3, 2, 1], "z": [0, 0, 0]}
+    mapping["3d"].update({"a": [1, 1, 1]})
+    assert mapping["3d"]["a"] == [1, 1, 1]
 
 
-def test_remote_mapping_nested_list_item_assignment_persists() -> None:
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
-    try:
-        mapping["a_list"] = {"a": [1, 1, 1]}
-        mapping["a_list"]["a"][0] = 99
-        assert mapping["a_list"]["a"] == [99, 1, 1]
-    finally:
-        mapping.close()
+def test_remote_mapping_nested_item_assignment_persists(mapping: RemoteKVMapping) -> None:
+    mapping["user"] = {"alice": {"age": 30}}
+    mapping["user"]["alice"]["email"] = "alice@example.com"
+    assert mapping["user"]["alice"]["email"] == "alice@example.com"
 
 
-def test_remote_mapping_top_level_list_item_assignment_persists() -> None:
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
-    try:
-        mapping["arr"] = [1, 2, 3]
-        mapping["arr"][1] = 9
-        assert mapping["arr"] == [1, 9, 3]
-    finally:
-        mapping.close()
+def test_remote_mapping_nested_list_item_assignment_persists(mapping: RemoteKVMapping) -> None:
+    mapping["a_list"] = {"a": [1, 1, 1]}
+    mapping["a_list"]["a"][0] = 99
+    assert mapping["a_list"]["a"] == [99, 1, 1]
 
 
-def test_remote_mapping_returns_write_through_dict_wrappers() -> None:
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
-    try:
-        mapping["user"] = {"alice": {"age": 30}}
-        result = mapping["user"]
-        assert isinstance(result, _WriteThroughDict)
-        assert isinstance(result["alice"], _WriteThroughDict)
-    finally:
-        mapping.close()
+def test_remote_mapping_top_level_list_item_assignment_persists(mapping: RemoteKVMapping) -> None:
+    mapping["arr"] = [1, 2, 3]
+    mapping["arr"][1] = 9
+    assert mapping["arr"] == [1, 9, 3]
 
 
-def test_remote_mapping_returns_write_through_list_wrappers() -> None:
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
-    try:
-        mapping["arr"] = [1, {"nested": [2, 3]}]
-        result = mapping["arr"]
-        assert isinstance(result, _WriteThroughList)
-        assert isinstance(result[1], _WriteThroughDict)
-        assert isinstance(result[1]["nested"], _WriteThroughList)
-    finally:
-        mapping.close()
+def test_remote_mapping_returns_write_through_dict_wrappers(mapping: RemoteKVMapping) -> None:
+    mapping["user"] = {"alice": {"age": 30}}
+    result = mapping["user"]
+    assert isinstance(result, _WriteThroughDict)
+    assert isinstance(result["alice"], _WriteThroughDict)
 
 
-def test_remote_mapping_copy_returns_plain_detached_snapshot() -> None:
+def test_remote_mapping_returns_write_through_list_wrappers(mapping: RemoteKVMapping) -> None:
+    mapping["arr"] = [1, {"nested": [2, 3]}]
+    result = mapping["arr"]
+    assert isinstance(result, _WriteThroughList)
+    assert isinstance(result[1], _WriteThroughDict)
+    assert isinstance(result[1]["nested"], _WriteThroughList)
+
+
+def test_remote_mapping_copy_returns_plain_detached_snapshot(mapping: RemoteKVMapping) -> None:
     expected_age = 30
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
-    try:
-        mapping["user"] = {"alice": {"age": expected_age}}
-        snapshot = mapping.copy()
+    mapping["user"] = {"alice": {"age": expected_age}}
+    snapshot = mapping.copy()
 
-        assert snapshot == {"user": {"alice": {"age": expected_age}}}
-        assert isinstance(snapshot, dict)
+    assert snapshot == {"user": {"alice": {"age": expected_age}}}
+    assert isinstance(snapshot, dict)
 
-        snapshot["user"]["alice"]["age"] = 99
-        assert mapping["user"]["alice"]["age"] == expected_age
-    finally:
-        mapping.close()
+    snapshot["user"]["alice"]["age"] = 99
+    assert mapping["user"]["alice"]["age"] == expected_age
 
 
 @given(key=_KEYS, value=_JSON_VALUES)
@@ -189,59 +145,34 @@ def _assert_or(mapping: RemoteKVMapping, operand: object, expected: dict[str, ob
     assert isinstance(merged, dict)
 
 
-def test_remote_mapping_ior_with_mapping_operand() -> None:
+def test_remote_mapping_ior_with_mapping_operand(mapping: RemoteKVMapping) -> None:
     updated_a = 2
     updated_b = 3
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
-    try:
-        mapping["a"] = 1
-        _assert_ior(mapping, {"a": updated_a, "b": updated_b}, {"a": updated_a, "b": updated_b})
-    finally:
-        mapping.close()
+    mapping["a"] = 1
+    _assert_ior(mapping, {"a": updated_a, "b": updated_b}, {"a": updated_a, "b": updated_b})
 
 
-def test_remote_mapping_ior_with_iterable_pairs_operand() -> None:
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
-    try:
-        _assert_ior(mapping, [("x", {"value": 1}), ("y", {"value": 2})], {"x": {"value": 1}, "y": {"value": 2}})
-    finally:
-        mapping.close()
+def test_remote_mapping_ior_with_iterable_pairs_operand(mapping: RemoteKVMapping) -> None:
+    _assert_ior(mapping, [("x", {"value": 1}), ("y", {"value": 2})], {"x": {"value": 1}, "y": {"value": 2}})
 
 
-def test_remote_mapping_ior_invalid_operand_raises_type_error() -> None:
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
-    try:
-        with pytest.raises(TypeError):
-            mapping |= 42
-    finally:
-        mapping.close()
+def test_remote_mapping_ior_invalid_operand_raises_type_error(mapping: RemoteKVMapping) -> None:
+    with pytest.raises(TypeError):
+        mapping |= 42
 
 
-def test_remote_mapping_or_invalid_operand_raises_type_error() -> None:
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
-    try:
-        with pytest.raises(TypeError):
-            _ = mapping | 42
-    finally:
-        mapping.close()
+def test_remote_mapping_or_invalid_operand_raises_type_error(mapping: RemoteKVMapping) -> None:
+    with pytest.raises(TypeError):
+        _ = mapping | 42
 
 
-def test_remote_mapping_or_returns_detached_merged_snapshot() -> None:
-    backend = InMemoryAsyncBackend()
-    mapping = RemoteKVMapping(backend=backend, entry_point="ep1", sep=":")
-    try:
-        mapping["a"] = {"value": 1}
-        _assert_or(mapping, {"a": {"value": 2}, "b": {"value": 3}}, {"a": {"value": 2}, "b": {"value": 3}})
+def test_remote_mapping_or_returns_detached_merged_snapshot(mapping: RemoteKVMapping) -> None:
+    mapping["a"] = {"value": 1}
+    _assert_or(mapping, {"a": {"value": 2}, "b": {"value": 3}}, {"a": {"value": 2}, "b": {"value": 3}})
 
-        assert mapping["a"] == {"value": 1}
-        with pytest.raises(KeyError):
-            _ = mapping["b"]
-    finally:
-        mapping.close()
+    assert mapping["a"] == {"value": 1}
+    with pytest.raises(KeyError):
+        _ = mapping["b"]
 
 
 @given(

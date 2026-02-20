@@ -75,6 +75,6 @@ replacement of the built-in `dict` behavior.
 - [ ] Implement `fromkeys()` with explicit persistence semantics.
 - [x] Add write-through wrappers for list operations.
 - [ ] Add write-through wrappers for additional mutable container types (if
-  required).
+      required).
 - [ ] Decide and document stable ordering strategy (sorted vs insertion-order).
 - [ ] Add dedicated parity tests against a reference `dict` behavior matrix.
