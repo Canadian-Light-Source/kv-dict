@@ -4,7 +4,7 @@ import importlib.metadata
 import warnings
 
 from ._version import version as __version__
-from .backends import Backend, InMemoryAsyncBackend, NatsBackend, RedisBackend
+from .backends import Backend, InMemoryAsyncBackend, NatsBackend, PostgresBackend, RedisBackend
 from .key_mapping import KeyMapper
 from .mappings import RemoteKVMapping
 
@@ -14,6 +14,7 @@ __all__ = [
     "InMemoryAsyncBackend",
     "KeyMapper",
     "NatsBackend",
+    "PostgresBackend",
     "RedisBackend",
     "RemoteKVMapping",
     "__version__",

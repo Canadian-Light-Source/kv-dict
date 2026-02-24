@@ -40,9 +40,19 @@ Run a basic `RemoteKVMapping` flow backed by a Redis-compatible server:
 uv run python examples/remote_mapping_redis_example.py
 ```
 
-> [!NOTE]
-> In the devcontainer compose setup, the Redis-compatible service hostname is
-> `redis`.
+> [!NOTE] In the devcontainer compose setup, the Redis-compatible service
+> hostname is `redis`.
+
+## Remote Mapping + PostgreSQL Backend Example
+
+Run a basic `RemoteKVMapping` flow backed by PostgreSQL:
+
+```bash
+uv run python examples/remote_mapping_postgres_example.py
+```
+
+> [!NOTE] In the devcontainer compose setup, PostgreSQL is available on the
+> internal hostname/port `postgres:5432`.
 
 ## Remote Mapping + NATS JetStream KV Backend Example
 
@@ -52,13 +62,11 @@ Run a basic `RemoteKVMapping` flow backed by NATS JetStream KV:
 uv run python examples/remote_mapping_nats_example.py
 ```
 
-> [!IMPORTANT]
-> This example uses `create_bucket=False` (production-style). Ensure the
-> `kv_dict` bucket already exists.
+> [!IMPORTANT] This example uses `create_bucket=False` (production-style).
+> Ensure the `kv_dict` bucket already exists.
 
-> [!NOTE]
-> In the devcontainer compose setup, NATS is also available to host-side tools
-> at `nats://127.0.0.1:14222`.
+> [!NOTE] In the devcontainer compose setup, NATS is also available to host-side
+> tools at `nats://127.0.0.1:14222`.
 
 Watch the changes in the NATS KV with the CLI client:
 
@@ -116,10 +124,9 @@ replacement of the built-in `dict` behavior.
 
 ### Practical guidance
 
-> [!WARNING]
-> `RemoteKVMapping` is backend-backed, not purely in-memory. Avoid relying on
-> insertion-order behavior and reassignment-free updates for mutable non-list,
-> non-dict nested values.
+> [!WARNING] `RemoteKVMapping` is backend-backed, not purely in-memory. Avoid
+> relying on insertion-order behavior and reassignment-free updates for mutable
+> non-list, non-dict nested values.
 
 - Treat this mapping as a backend-backed structure, not an in-memory object.
 - For nested non-dict updates, reassign the modified value to persist changes.
