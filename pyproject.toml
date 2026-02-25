@@ -1,14 +1,17 @@
 [project]
 name = "kv-dict"
-description = "KV bacjed dictionary, similar to RedisJSONDict"
+description = "KV backed dictionary, similar to RedisJSONDict"
 license = { text = "GPL-3.0-only" }
 authors = [{ name = "Niko Kivel", email = "niko.kivel@lightsource.ca" }]
 dynamic = ["version"]
 classifiers = [
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.11,<3.15"
 readme = "README.md"
 dependencies = []
 
@@ -26,7 +29,7 @@ dev = [
   "ipython>=9.10.0",
   "bluesky>=1.14.6",
   "redis>=7.2.0",
-  "nats-py>=2.13.0",
+  "nats-py>=2.14.0",
   "asyncpg>=0.30.0",
 ]
 docs = [
@@ -41,7 +44,7 @@ docs = [
 managed = true
 [tool.pyright]
 # see https://github.com/microsoft/pyright/blob/main/docs/configuration.md
-pythonVersion = "3.13"
+pythonVersion = "3.14"
 include = ["kv_dict"]
 exclude = ["**/__pycache__"]
 typeCheckingMode = "standard"
@@ -57,7 +60,7 @@ reportImplicitOverride = "error"
 
 [tool.ruff]
 # see https://docs.astral.sh/ruff
-target-version = "py313"
+target-version = "py314"
 line-length = 121
 indent-width = 4
 extend-exclude = ["kv_dict/_version.py"] # auto-generated file
