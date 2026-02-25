@@ -97,10 +97,7 @@ class _WriteThroughDict(MutableMapping[str, Any]):
     def __eq__(self, other: object) -> bool:
         return self.to_plain_dict() == _to_plain(other)
 
-    @override
-    def __hash__(self) -> int:
-        msg = "unhashable type: '_WriteThroughDict'"
-        raise TypeError(msg)
+    __hash__: None = None
 
 
 class _WriteThroughList(MutableSequence[Any]):
@@ -168,10 +165,7 @@ class _WriteThroughList(MutableSequence[Any]):
     def __eq__(self, other: object) -> bool:
         return self.to_plain_list() == _to_plain(other)
 
-    @override
-    def __hash__(self) -> int:
-        msg = "unhashable type: '_WriteThroughList'"
-        raise TypeError(msg)
+    __hash__: None = None
 
 
 class _AsyncLoopBridge:
