@@ -1,31 +1,56 @@
 name: CI
 
 on:
-  workflow_dispatch:
-  pull_request:
-    branches:
-      - main
-      - master
   push:
     branches:
       - main
-      - master
-
-# Automatically stop in-progress runs on the same branch/PR
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    tags:
+      - "*"
+  pull_request:
 
 jobs:
-  code-checks:
-    uses: "daq/gha_workflows/.github/workflows/ci_checks_uv.yml@main"
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - uses: pre-commit/action@v3.0.1
 
-  tests:
+  test:
+    needs: pre-commit
     strategy:
-      fail-fast: false
       matrix:
-        python-version: ["3.13"]
-
-    uses: "daq/gha_workflows/.github/workflows/ci_tests_uv.yml@main"
+        # runs-on: ["ubuntu-latest", "windows-latest", "macos-latest"]
+        runs-on: ["ubuntu-latest"] # Linux for now
+        # python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"] # test multiple Python versions
+        python-version: ["3.14"] # test multiple Python versions, TODO: add all versions back in once we have CI working for 3.14
+      fail-fast: false
+    uses: ./.github/workflows/_test.yml
     with:
+      runs-on: ${{ matrix.runs-on }}
       python-version: ${{ matrix.python-version }}
+
+  # docs:
+  #   uses: ./.github/workflows/_docs.yml
+  #   permissions:
+  #     contents: write
+
+  # dist:
+  #   uses: ./.github/workflows/_dist.yml
+
+  # pypi:
+  #   needs: [dist, test]
+  #   if: github.ref_type == 'tag'
+  #   uses: ./.github/workflows/_pypi.yml
+  #   permissions:
+  #     id-token: write
+
+  # codeql:
+  #   uses: ./.github/workflows/_codeql.yml
+
+  # release:
+  #   needs: [dist, test, docs]
+  #   if: github.ref_type == 'tag'
+  #   uses: ./.github/workflows/_release.yml
+  #   permissions:
+  #     contents: write
