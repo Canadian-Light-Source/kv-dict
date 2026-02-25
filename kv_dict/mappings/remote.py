@@ -97,7 +97,7 @@ class _WriteThroughDict(MutableMapping[str, Any]):
     def __eq__(self, other: object) -> bool:
         return self.to_plain_dict() == _to_plain(other)
 
-    __hash__: None = None
+    __hash__: None = None  # type: ignore[assignment]  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
 class _WriteThroughList(MutableSequence[Any]):
@@ -115,10 +115,12 @@ class _WriteThroughList(MutableSequence[Any]):
         return _wrap_write_through(value, lambda _updated: self._persist())
 
     @overload
-    def __getitem__(self, index: int) -> Any: ...
+    def __getitem__(self, index: int) -> Any:
+        pass
 
     @overload
-    def __getitem__(self, index: slice) -> list[Any]: ...
+    def __getitem__(self, index: slice) -> list[Any]:
+        pass
 
     @override
     def __getitem__(self, index: int | slice) -> Any:
@@ -165,7 +167,7 @@ class _WriteThroughList(MutableSequence[Any]):
     def __eq__(self, other: object) -> bool:
         return self.to_plain_list() == _to_plain(other)
 
-    __hash__: None = None
+    __hash__: None = None  # type: ignore[assignment]  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
 class _AsyncLoopBridge:
