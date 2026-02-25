@@ -22,7 +22,7 @@ _JSON_VALUES = st.recursive(
 
 
 @pytest.fixture
-def mapping() -> Generator[RemoteKVMapping, None, None]:
+def mapping() -> Generator[RemoteKVMapping, None, None]:  # noqa: UP043
     test_mapping = RemoteKVMapping(backend=InMemoryAsyncBackend(), entry_point="ep1", sep=":")
     try:
         yield test_mapping
@@ -291,7 +291,7 @@ def test_remote_mapping_or_invalid_operand_raises_type_error(mapping: RemoteKVMa
 
 def test_remote_mapping_or_returns_detached_merged_snapshot(mapping: RemoteKVMapping) -> None:
     mapping["a"] = {"value": 1}
-    _assert_or(mapping, {"a": {"value": 2}, "b": {"value": 3}}, {"a": {"value": 2}, "b": {"value": 3}})
+    _assert_union(mapping, {"a": {"value": 2}, "b": {"value": 3}}, {"a": {"value": 2}, "b": {"value": 3}})
 
     assert mapping["a"] == {"value": 1}
     with pytest.raises(KeyError):
@@ -308,7 +308,7 @@ def test_remote_mapping_or_matches_dict_union_property(base: dict[str, object], 
     try:
         mapping.update(base)
         expected = dict(base) | dict(other)
-        _assert_or(mapping, other, expected)
+        _assert_union(mapping, other, expected)
         assert mapping.copy() == base
     finally:
         mapping.close()
