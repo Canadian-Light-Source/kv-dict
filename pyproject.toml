@@ -132,7 +132,7 @@ docstring-code-format = true
 docstring-code-line-length = "dynamic"
 
 [tool.pytest.ini_options]
-norecursedirs = ["kv_dict"]
+norecursedirs = ["kv_dict", ".hypothesis"]
 testpaths = ["tests"]
 addopts = "-v"
 
