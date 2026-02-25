@@ -1,11 +1,7 @@
 """Interface for ``python -m kv_dict``."""
 
 from argparse import ArgumentParser
-from typing import TYPE_CHECKING
-
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
+from collections.abc import Sequence  # noqa: TC003
 
 from ._version import version
 
