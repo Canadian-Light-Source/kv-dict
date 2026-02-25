@@ -22,7 +22,7 @@ _JSON_VALUES = st.recursive(
 
 
 @pytest.fixture
-def mapping() -> Generator[RemoteKVMapping, None, None]:  # noqa: UP043
+def mapping() -> Generator[RemoteKVMapping]:
     test_mapping = RemoteKVMapping(backend=InMemoryAsyncBackend(), entry_point="ep1", sep=":")
     try:
         yield test_mapping
