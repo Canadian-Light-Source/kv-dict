@@ -29,11 +29,18 @@ jobs:
             - name: Check for packaging errors
               run: uvx twine check --strict dist/*
 
-            - name: Install produced wheel
-              run: |
-                  uv add pip && 
-                  uv run python -m pip install dist/*.whl
+            - name: Install produced wheel (DLS)
+              run: python -m pip install dist/*.whl
 
-            - name: Test module --version works using the installed wheel
+            - name: Test module --version works using the installed wheel (DLS)
               # If more than one module in src/ replace with module name to test
-              run: uv run python -m kv_dict --version
+              run: python -m $(ls --hide='*.egg-info' src | head -1) --version
+
+            # - name: Install produced wheel
+            #   run: |
+            #       uv add pip &&
+            #       uv run python -m pip install dist/*.whl
+
+            # - name: Test module --version works using the installed wheel
+            #   # If more than one module in src/ replace with module name to test
+            #   run: uv run python -m kv_dict --version
