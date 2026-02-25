@@ -262,7 +262,7 @@ def _assert_ior(mapping: RemoteKVMapping, operand: object, expected: dict[str, o
     assert mapping.copy() == expected
 
 
-def _assert_or(mapping: RemoteKVMapping, operand: object, expected: dict[str, object]) -> None:
+def _assert_union(mapping: RemoteKVMapping, operand: object, expected: dict[str, object]) -> None:
     merged = mapping | operand
     assert merged == expected
     assert isinstance(merged, dict)
