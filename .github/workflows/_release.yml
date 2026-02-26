@@ -12,13 +12,8 @@ jobs:
           merge-multiple: true
 
       - name: Create GitHub Release
-        # We pin to the SHA, not the tag, for security reasons.
-        # https://docs.github.com/en/actions/learn-github-actions/security-hardening-for-github-actions#using-third-party-actions
         uses: softprops/action-gh-release@v2
         with:
-          prerelease:
-            ${{ contains(github.ref_name, 'a') || contains(github.ref_name, 'b')
-            || contains(github.ref_name, 'rc') }}
           files: |
             *.whl
             *.tar.gz
