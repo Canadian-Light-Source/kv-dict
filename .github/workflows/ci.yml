@@ -30,11 +30,6 @@ jobs:
       runs-on: ${{ matrix.runs-on }}
       python-version: ${{ matrix.python-version }}
 
-  # docs:
-  #   uses: ./.github/workflows/_docs.yml
-  #   permissions:
-  #     contents: write
-
   dist:
     uses: ./.github/workflows/_dist.yml
 
@@ -45,12 +40,12 @@ jobs:
     permissions:
       id-token: write
 
-  # codeql:
-  #   uses: ./.github/workflows/_codeql.yml
+  codeql:
+    uses: ./.github/workflows/_codeql.yml
 
-  # release:
-  #   needs: [dist, test, docs]
-  #   if: github.ref_type == 'tag'
-  #   uses: ./.github/workflows/_release.yml
-  #   permissions:
-  #     contents: write
+  release:
+    needs: [dist, test]
+    if: github.ref_type == 'tag'
+    uses: ./.github/workflows/_release.yml
+    permissions:
+      contents: write

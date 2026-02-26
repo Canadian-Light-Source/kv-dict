@@ -1,4 +1,4 @@
-[![CI](https://github.lightsource.ca/daq/kv-dict/actions/workflows/ci.yml/badge.svg)](https://github.lightsource.ca/daq/kv-dict/actions/workflows/ci.yml)
+[![CI](https://github.com/Canadian-Light-Source/kv-dict/actions/workflows/ci.yml/badge.svg)](https://github.com/Canadian-Light-Source/kv-dict/actions/workflows/ci.yml)
 
 # kv-dict
 
@@ -6,10 +6,10 @@ KV backed dictionary, similar to RedisJSONDict
 
 ## Install Package
 
-- pip: `pip install git+https://github.lightsource.ca/daq/kv-dict`
-- uv: `uv add git+https://github.lightsource.ca/daq/kv-dict`
+- pip: `pip install kv-dict`
+- uv: `uv add kv-dict`
   - add `--optional FEATURE` to add as an optional dependency
-- pixi: `pixi add --git https://github.lightsource.ca/daq/kv-dict`
+- pixi: `pixi add --pypi kv-dict`
   - add `--feature FEATURE` to add as an optional dependency
 
 ## Development
@@ -19,7 +19,7 @@ instructions may be found
 [here](https://docs.astral.sh/uv/getting-started/installation/).
 
 ```bash
-git clone https://github.lightsource.ca/daq/kv-dict.git
+git clone https://github.com/Canadian-Light-Source/kv-dict.git
 cd kv-dict
 uv sync --all-extras
 ```
@@ -40,7 +40,8 @@ Run a basic `RemoteKVMapping` flow backed by a Redis-compatible server:
 uv run python examples/remote_mapping_redis_example.py
 ```
 
-> [!NOTE] In the devcontainer compose setup, the Redis-compatible service
+> [!NOTE]
+> In the devcontainer compose setup, the Redis-compatible service
 > hostname is `redis`.
 
 ## Remote Mapping + PostgreSQL Backend Example
@@ -51,7 +52,8 @@ Run a basic `RemoteKVMapping` flow backed by PostgreSQL:
 uv run python examples/remote_mapping_postgres_example.py
 ```
 
-> [!NOTE] In the devcontainer compose setup, PostgreSQL is available on the
+> [!NOTE]
+> In the devcontainer compose setup, PostgreSQL is available on the
 > internal hostname/port `postgres:5432`.
 
 ## Remote Mapping + NATS JetStream KV Backend Example
@@ -62,10 +64,12 @@ Run a basic `RemoteKVMapping` flow backed by NATS JetStream KV:
 uv run python examples/remote_mapping_nats_example.py
 ```
 
-> [!IMPORTANT] This example uses `create_bucket=False` (production-style).
+> [!IMPORTANT]
+> This example uses `create_bucket=False` (production-style).
 > Ensure the `kv_dict` bucket already exists.
 
-> [!NOTE] In the devcontainer compose setup, NATS is also available to host-side
+> [!NOTE]
+> In the devcontainer compose setup, NATS is also available to host-side
 > tools at `nats://127.0.0.1:14222`.
 
 Watch the changes in the NATS KV with the CLI client:
@@ -124,7 +128,8 @@ replacement of the built-in `dict` behavior.
 
 ### Practical guidance
 
-> [!WARNING] `RemoteKVMapping` is backend-backed, not purely in-memory. Avoid
+> [!WARNING]
+> `RemoteKVMapping` is backend-backed, not purely in-memory. Avoid
 > relying on insertion-order behavior and reassignment-free updates for mutable
 > non-list, non-dict nested values.
 
