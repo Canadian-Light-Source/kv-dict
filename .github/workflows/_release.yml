@@ -19,5 +19,7 @@ jobs:
           prerelease:
             ${{ contains(github.ref_name, 'a') || contains(github.ref_name, 'b')
             || contains(github.ref_name, 'rc') }}
-          files: "*"
+          files: |
+            *.whl
+            *.tar.gz
           generate_release_notes: true
