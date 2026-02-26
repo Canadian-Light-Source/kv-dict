@@ -1,4 +1,4 @@
-[![CI](https://github.lightsource.ca/daq/kv-dict/actions/workflows/ci.yml/badge.svg)](https://github.lightsource.ca/daq/kv-dict/actions/workflows/ci.yml)
+[![CI](https://github.com/Canadian-Light-Source/kv-dict/actions/workflows/ci.yml/badge.svg)](https://github.com/Canadian-Light-Source/kv-dict/actions/workflows/ci.yml)
 
 # kv-dict
 
@@ -6,10 +6,10 @@ KV backed dictionary, similar to RedisJSONDict
 
 ## Install Package
 
-- pip: `pip install git+https://github.lightsource.ca/daq/kv-dict`
-- uv: `uv add git+https://github.lightsource.ca/daq/kv-dict`
+- pip: `pip install kv-dict`
+- uv: `uv add kv-dict`
   - add `--optional FEATURE` to add as an optional dependency
-- pixi: `pixi add --git https://github.lightsource.ca/daq/kv-dict`
+- pixi: `pixi add --pypi kv-dict`
   - add `--feature FEATURE` to add as an optional dependency
 
 ## Development
@@ -19,7 +19,7 @@ instructions may be found
 [here](https://docs.astral.sh/uv/getting-started/installation/).
 
 ```bash
-git clone https://github.lightsource.ca/daq/kv-dict.git
+git clone https://github.com/Canadian-Light-Source/kv-dict.git
 cd kv-dict
 uv sync --all-extras
 ```
