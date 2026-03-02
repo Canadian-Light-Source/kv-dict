@@ -1,0 +1,16 @@
+on:
+  workflow_call:
+
+jobs:
+  ty:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install the latest version of uv and set the python version
+        uses: astral-sh/setup-uv@v7
+
+      - name: Run ty
+        run: |
+          uv run --frozen ty check

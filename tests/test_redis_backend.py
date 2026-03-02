@@ -8,7 +8,7 @@ class _FakeRedisClient:
         self.store: dict[str, str] = {}
         self.closed = False
 
-    async def get(self, key: str) -> str | None:
+    async def get(self, key: str) -> str | bytes | None:
         return self.store.get(key)
 
     async def set(self, key: str, value: str) -> None:
